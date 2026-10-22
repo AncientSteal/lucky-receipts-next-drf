@@ -44,6 +44,6 @@ class MainRedirectView(View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             # пользователь вошел — отправляем на фронтенд
-            return redirect('http://localhost:5173/')
+            return redirect('http://localhost:3000/')
         # пользователь не вошел — отправляем на стандартную страницу входа Django
         return redirect('rest_framework:login')
