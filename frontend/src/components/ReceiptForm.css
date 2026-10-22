@@ -1,0 +1,162 @@
+.form-container {
+  max-width: 500px;
+  background-color: var(--bg);
+  margin: 0 auto;
+  padding: 32px;
+  border-radius: 24px;
+  position: relative;
+  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.1);
+}
+
+.form-container .alert-error {
+  color: red;
+}
+
+.form-container label {
+  color: var(--text);
+}
+
+.close-form-btn {
+  position: absolute;
+  right: 24px;
+  top: 24px;
+}
+
+.form-header {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text);
+}
+
+.form-header h3 {
+  font-size: 32px;
+  font-weight: 400;
+  color: black;
+}
+
+.form-group {
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-container input {
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--input-border);
+  transition: border ease-in-out 0.3s;
+
+}
+
+.form-container input:hover {
+  border: 1px solid var(--accent);
+}
+
+.form-container input.input-error {
+  border: 1px solid red;
+}
+
+.form-container input.input-error::placeholder {
+  color: red;
+  opacity: 0.5;
+}
+
+.form-container input:focus {
+  border: 1px solid var(--accent);
+  outline: none;
+}
+
+.form-container label {
+  font-size: 14px;
+}
+
+.qr-autofill-group {
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.error-text {
+  font-size: 12px;
+  color: var(--rejected-status);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.submit-btn {
+  display: flex;
+  justify-content: center;
+  color: var(--bg);
+  background-color: var(--accent);
+  border-radius: 12px;
+  width: 100%;
+  padding: 14px;
+  margin-top: 20px;
+  box-sizing: border-box;
+}
+
+.form-alert {
+    font-size: 14px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding-top: 4px;
+}
+
+@media (max-width: 500px) {
+  .form-container {
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 14px;
+  }
+
+  .form-header h3 {
+    font-size: 18px;
+  }
+
+  .form-group {
+    padding-top: 8px;
+    gap: 4px;
+  }
+
+  .qr-autofill-group {
+    padding-top: 8px;
+    gap: 4px;
+  }
+
+  .close-form-btn {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+  }
+
+  .error-text {
+    gap: 4px;
+  }
+}
+
+/* тут набор стилей для особого инпута даты покупки. 
+   Потому пишем по псевдоэлементам движка WebKit */
+
+.form-group input.input-error::-webkit-datetime-edit-text,
+.form-group input.input-error::-webkit-datetime-edit-month-field,
+.form-group input.input-error::-webkit-datetime-edit-day-field,
+.form-group input.input-error::-webkit-datetime-edit-year-field,
+.form-group input.input-error::-webkit-datetime-edit-hour-field,
+.form-group input.input-error::-webkit-datetime-edit-minute-field {
+  color: var(--rejected-status);
+}
+
+.form-group input::-webkit-datetime-edit-text,
+.form-group input::-webkit-datetime-edit-month-field,
+.form-group input::-webkit-datetime-edit-day-field,
+.form-group input::-webkit-datetime-edit-year-field,
+.form-group input::-webkit-datetime-edit-hour-field,
+.form-group input::-webkit-datetime-edit-minute-field {
+  color: var(--text);
+}

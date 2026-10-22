@@ -1,0 +1,172 @@
+header {
+  background-color: var(--bg);
+  padding: 26px var(--fileds);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.logo-state {
+  display: flex;
+  align-items: center;
+}
+
+.header-logo {
+  background-color: var(--logo-bg);
+  width: 142px;
+  height: 38px;
+}
+
+.header-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 12px;
+  color: var(--text);
+}
+
+.header-nav-desktop {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-size: medium;
+}
+
+.nav-btn.active {
+  background-color: var(--btn-active);
+}
+
+.header-profile {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+}
+
+.header-avatar {
+  border-radius: 50%;
+  background-color: var(--logo-bg);
+  width: 38px;
+  height: 38px;
+}
+
+.profile-short {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-right: 10px;
+}
+
+.profile-short p {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text-h);
+}
+
+.profile-short span {
+  font-size: 16px;
+  color: var(--text);
+}
+
+.header-nav-desktop {
+  display: flex;
+}
+.mobile-nav-wrapper {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .header-nav {
+    gap: 6px;
+    font-size: 14px;
+  }
+
+  .header-logo {
+    width: 102px;
+    height: 32px;
+  }
+
+  .logo-state {
+    font-size: 14px;
+  }
+
+  .header-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .profile-short p {
+    font-size: 14px;
+  }
+
+  .profile-short span {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 900px) {
+  header {
+    box-sizing: border-box;
+    height: 92px;
+  }
+  .header-nav-desktop {
+    display: none;
+  }
+  .mobile-nav-wrapper {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    box-sizing: border-box;
+    height: 40px;
+  }
+}
+
+.burger-toggle-btn {
+  z-index: 1001;
+}
+
+.header-nav-mobile {
+  position: fixed;
+  top: 0;
+  right: -200%;
+  width: 240px;
+  height: 100vh;
+  background-color: #fff;
+  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  padding: 40px 16px 16px 16px;
+  gap: 16px;
+  transition: right 0.3s ease;
+  z-index: 1000;
+}
+
+.header-nav-mobile.visible {
+  right: 0;
+}
+
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 999;
+}
