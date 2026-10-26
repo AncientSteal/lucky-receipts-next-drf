@@ -5,65 +5,14 @@ import Link from "next/link";
 import { useUserStore } from "@/app/store/useUserStore";
 import { usePathname } from "next/navigation";
 import {
-  ArrowIcon, HomeIcon, AskIcon,
-  ProfileIcon, SignIcon, CloseIcon, BurgerIcon,
+  ArrowIcon, CloseIcon, BurgerIcon,
 } from "./Icons";
 import "./Header.css";
+import { NavigationLinks } from "./NavigationLinks";
+import { ProfileBlock } from "./ProfileBlock";
 
-export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const pathname = usePathname();
-  const user = useUserStore((state) => state.user);
-  const userName = user?.username || 'User';
-  const userEmail = user?.email || 'email не указан';
-
-
-  const isActive = (path: string) => pathname === path ? "active" : "";
-
-  // Общий компонент для меню, чтобы не дублировать код для мобилки и десктопа
-  const NavigationLinks = () => (
-    <>
-      <Link 
-        href="/" 
-        className={`nav-btn ${isActive("/")} button-navigation`}
-        onClick={() => setIsMenuOpen(false)}
-      >
-        <HomeIcon />
-        Личный кабинет
-      </Link>
-      <Link 
-        href="/rules"
-        className={`nav-btn ${isActive("/rules")} button-navigation`}
-        onClick={() => setIsMenuOpen(false)}
-      >
-        <AskIcon />
-        Правила
-      </Link>
-      <Link 
-        href="/profile"
-        className={`nav-btn ${isActive("/profile")} button-navigation`}
-        onClick={() => setIsMenuOpen(false)}
-      >
-        <ProfileIcon />
-        Профиль
-      </Link>
-    </>
-  );
-
-  const ProfileBlock = () => (
-    <div className="header-profile">
-      <SignIcon />
-      <div className="profile-info">
-        <div className="header-avatar"></div>
-        <div className="profile-short">
-          <p>{userName}</p>
-          <span>{userEmail}</span>
-        </div>
-      </div>
-    </div>
-  );
-
-  const LogoBlock = () => (
+function LogoBlock() {
+  return (
     <div className="logo-state">
       <div className="header-logo"></div>
       <Link href="/" className="header-link button-navigation">
@@ -72,6 +21,14 @@ export default function Header() {
       </Link>
     </div>
   );
+}
+
+export default function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const user = useUserStore((state) => state.user);
+  const userName = user?.username || 'User';
+  const userEmail = user?.email || 'email не указан';
 
   return (
     <header className="app-header">
@@ -87,8 +44,8 @@ export default function Header() {
           </button>
 
           <nav className={`header-nav-mobile ${isMenuOpen ? "visible" : ""}`} aria-label="Мобильное меню">
-            <ProfileBlock />
-            <NavigationLinks />
+            <ProfileBlock userEmail={userEmail} userName={userName}/>
+            <NavigationLinks pathname={pathname} setIsMenuOpen={setIsMenuOpen}/>
           </nav>
 
           {isMenuOpen && (
@@ -101,10 +58,10 @@ export default function Header() {
         <div className="header-nav-desktop">
           <LogoBlock />
           <nav className="header-nav" aria-label="Основное меню">
-            <NavigationLinks />
+            <NavigationLinks pathname={pathname} setIsMenuOpen={setIsMenuOpen}/>
           </nav>
 
-          <ProfileBlock />
+          <ProfileBlock userEmail={userEmail} userName={userName}/>
         </div>
       </div>
     </header>

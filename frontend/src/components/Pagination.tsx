@@ -9,15 +9,15 @@ interface PaginationProps {
 }
 
 export default function Pagination({ count, currentPage, setPage }: PaginationProps) {
-  if (count <= 0) return null;
-
   const pageSize = 10;
   const totalPages = Math.ceil(count / pageSize);
 
-  if (totalPages <= 1) return null;
-
   const visiblePages = useMemo(() => {
     const pages: (number | string)[] = [];
+
+    if (totalPages <= 1) {
+      return pages;
+    }
     
     // Если страниц мало (меньше 7) — показываем их все
     if (totalPages <= 7) {
@@ -41,7 +41,9 @@ export default function Pagination({ count, currentPage, setPage }: PaginationPr
 
     pages.push(totalPages); // Последняя всегда видна
     return pages;
-  }, [count, currentPage, totalPages]);
+  }, [count, currentPage]);
+
+  if (count <= 0 || totalPages <= 1) return null;
 
   return (
     <div className="pagination-container">
