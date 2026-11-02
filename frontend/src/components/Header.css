@@ -42,6 +42,10 @@ header {
   font-size: medium;
 }
 
+.nav-btn {
+  color: var(--text);
+}
+
 .nav-btn.active {
   background-color: var(--btn-active);
 }

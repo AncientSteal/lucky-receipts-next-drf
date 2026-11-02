@@ -1,11 +1,14 @@
+import { useUserStore } from "@/app/store/useUserStore";
 import { SignIcon } from "./Icons";
 
-interface ProfileBlockProps {
-  userName: string;
-  userEmail: string;
-}
+export function ProfileBlock() {
+  const user = useUserStore((state) => state.user);
+  const userName = user?.username || "User";
+  const userEmail = user?.email || "email не указан";
+  const isInitialized = useUserStore((state) => state.isInitialized);
 
-export function ProfileBlock({ userName, userEmail }: ProfileBlockProps) {
+  console.log("РЕНДЕР ПРОФИЛЯ:", { username: user?.username, isInitialized });
+
   return (
     <div className="header-profile">
       <SignIcon />

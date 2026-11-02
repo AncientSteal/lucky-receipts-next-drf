@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link"; 
-import { useUserStore } from "@/app/store/useUserStore";
 import { usePathname } from "next/navigation";
 import {
   ArrowIcon, CloseIcon, BurgerIcon,
@@ -26,9 +25,6 @@ function LogoBlock() {
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  const user = useUserStore((state) => state.user);
-  const userName = user?.username || 'User';
-  const userEmail = user?.email || 'email не указан';
 
   return (
     <header className="app-header">
@@ -44,7 +40,7 @@ export default function Header() {
           </button>
 
           <nav className={`header-nav-mobile ${isMenuOpen ? "visible" : ""}`} aria-label="Мобильное меню">
-            <ProfileBlock userEmail={userEmail} userName={userName}/>
+            <ProfileBlock />
             <NavigationLinks pathname={pathname} setIsMenuOpen={setIsMenuOpen}/>
           </nav>
 
@@ -61,7 +57,7 @@ export default function Header() {
             <NavigationLinks pathname={pathname} setIsMenuOpen={setIsMenuOpen}/>
           </nav>
 
-          <ProfileBlock userEmail={userEmail} userName={userName}/>
+          <ProfileBlock />
         </div>
       </div>
     </header>

@@ -135,14 +135,14 @@ def test_main_redirect_anonymous_user(client):
 
 @pytest.mark.django_db
 def test_main_redirect_authenticated_user(client, test_user):
-    """ Авторизованного пользователя должно редиректить на React (порт 5173)"""
+    """ Авторизованного пользователя должно редиректить на React (порт 3000)"""
     # Логиним пользователя в нашем тестовом браузере
     client.force_login(test_user)
 
     response = client.get(reverse('main-index'))
 
     assert response.status_code == 302
-    assert response.url == 'http://localhost:5173/'
+    assert response.url == 'http://localhost:3000/'
 
 
 # --- ТЕСТЫ НА БЕЗОПАСНОСТЬ VIEWSET (Ограничение чужих чеков) ---

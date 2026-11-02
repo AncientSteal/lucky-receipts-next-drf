@@ -1,20 +1,15 @@
 "use client";
-
-import { useRouter, useSearchParams } from "next/navigation";
+import "@/components/ReceiptForm.css";
+import { useRouter } from "next/navigation";
 import { useReceiptsStore } from "@/app/store/useReceiptsStore";
 import ReceiptForm from "@/components/ReceiptForm";
-import SuccessModal from "@/components/SuccessModal";
 
 export default function FormPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const fetchReceipts = useReceiptsStore((state) => state.fetchReceipts);
-
-  const isSuccess = searchParams.get("success") === "true";
 
   const handleFormSuccess = () => {
-    fetchReceipts(1); 
-    router.push("/form?success=true"); 
+    useReceiptsStore.getState().fetchReceipts(1); // Вызов напрямую из стора
+    router.push("/form/success");
   };
 
   const handleCloseModal = () => {
@@ -27,10 +22,6 @@ export default function FormPage() {
         onSuccess={handleFormSuccess}
         onClose={handleCloseModal}
       />
-
-      {isSuccess && (
-        <SuccessModal onClose={handleCloseModal} />
-      )}
     </>
   );
 }

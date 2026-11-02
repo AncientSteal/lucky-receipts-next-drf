@@ -26,6 +26,8 @@ export const useUserStore = create<UserState>((set, get) => ({
   logout: () => set({ user: null, error: null, isInitialized: false }),
 
   fetchUser: async () => {
+    // ЗАЩИТА: Если код пытается выполнить это на сервере Next.js - мгновенно выходим
+    if (typeof window === 'undefined') return; 
     if (get().isLoading || get().isInitialized) return;
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
