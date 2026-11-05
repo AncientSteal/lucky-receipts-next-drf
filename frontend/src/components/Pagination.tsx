@@ -41,7 +41,7 @@ export default function Pagination({ count, currentPage, setPage }: PaginationPr
 
     pages.push(totalPages); // Последняя всегда видна
     return pages;
-  }, [count, currentPage]);
+  }, [currentPage, totalPages]);
 
   if (count <= 0 || totalPages <= 1) return null;
 

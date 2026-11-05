@@ -1,139 +1,25 @@
-import { useState, ChangeEvent, FormEvent } from "react";
+// components/ReceiptForm.tsx
+"use client";
+
+import { useReceiptForm } from "@/app/hooks/useReceiptForm";
 import { CloseIcon, DangerIcon } from "./Icons";
-import { getCookieClient } from "@/app/utils/getCookieClient";
-import { validateReceiptForm, ReceiptFormData, ReceiptFormErrors } from "@/app/utils/validateReceipt";
-import { parseQrString } from "@/app/utils/parseQrString";
-import { getApiUrl } from "@/app/utils/getApi";
-import "./ReceiptForm.css";
 
 interface ReceiptFormProps {
   onSuccess?: () => void;
   onClose?: () => void;
 }
 
-interface SubmitStatus {
-  success: boolean | null;
-  message: string;
-}
-
 export default function ReceiptForm({ onSuccess, onClose }: ReceiptFormProps) {
-  const [formData, setFormData] = useState<ReceiptFormData>({
-    fn: "",
-    fd: "",
-    fp: "",
-    purchase_date: "",
-    amount: "",
-  });
-
-  // Стейт для поля быстрой вставки строки QR-кода
-  const [qrRawString, setQrRawString] = useState<string>("");
-  const [errors, setErrors] = useState<ReceiptFormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>({
-    success: null,
-    message: "",
-  });
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name as keyof ReceiptFormData]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
-
-  const handleQrChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setQrRawString(value);
-
-    // запускаем  утилиту парсинга
-    const parsedData = parseQrString(value);
-
-    if (parsedData) {
-      setFormData(parsedData); // наполняем инпуты
-      setErrors({}); // чистим ошибки
-    }
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitStatus({ success: null, message: "" });
-
-    const validationErrors = validateReceiptForm(formData);
-    setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) return;
-
-    setIsSubmitting(true);
-
-    const controller = new AbortController();
-    const timeoutSignal = AbortSignal.timeout(5000);
-    const combinedSignal = AbortSignal.any([controller.signal, timeoutSignal]);
-
-    try {
-      const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/receipts/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCookieClient("csrftoken") ?? undefined,
-        } as Record<string, string>,
-        signal: combinedSignal,
-        body: JSON.stringify({
-          fn: formData.fn,
-          fd: formData.fd,
-          fp: formData.fp,
-          purchase_date: formData.purchase_date ? new Date(formData.purchase_date).toISOString() : "", // сразу к ISO для бэкенда
-          amount: formData.amount,
-        }),
-        credentials: "include",
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSubmitStatus({
-          success: true,
-          message: "Чек успешно зарегистрирован и отправлен на модерацию!",
-        });
-        if (onSuccess) onSuccess();
-      } else {
-        if (result.purchase_date) {
-          setErrors((prev) => ({
-            ...prev,
-            purchase_date: result.purchase_date,
-          }));
-        }
-        if (result.non_field_errors) {
-          setSubmitStatus({ success: false, message: result.non_field_errors });
-        } else {
-          setSubmitStatus({
-            success: false,
-            message: "Ошибка валидации данных на сервере.",
-          });
-        }
-      }
-    } catch (error: unknown) {
-      const isTimeout = error instanceof Error && error.name === "TimeoutError";
-
-      if (isTimeout || (combinedSignal.aborted && combinedSignal.reason?.name === "TimeoutError")) {
-        console.error("Превышено время ожидания ответа от сервера!");
-        setSubmitStatus({
-          success: false,
-          message: "Сервер отвечает слишком долго. Проверьте соединение и попробуйте позже.",
-        });
-      } else if (error instanceof Error && error.name === "AbortError") {
-        console.log("Запрос отменен");
-      } else {
-        console.error("Сетевая ошибка при загрузке формы:", error);
-        setSubmitStatus({
-          success: false,
-          message: "Сетевая ошибка сервера. Попробуйте позже.",
-        });
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    formData,
+    qrRawString,
+    errors,
+    isSubmitting,
+    submitStatus,
+    handleChange,
+    handleQrChange,
+    handleSubmit,
+  } = useReceiptForm(onSuccess);
 
   return (
     <section className="screen-form">
