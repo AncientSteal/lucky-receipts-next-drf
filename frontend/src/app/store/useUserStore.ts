@@ -1,12 +1,17 @@
 import { create } from "zustand";
+import { z } from 'zod';
 
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-}
+// Схема — единственный источник правды для данных пользователя
+export const userSchema = z.object({
+  id: z.number(),
+  username: z.string(),
+  email: z.email(),
+  first_name: z.string(),
+  last_name: z.string(),
+});
+
+// Автоматически получаем тип User для стейта
+export type User = z.infer<typeof userSchema>;
 
 interface UserState {
   user: User | null;
@@ -26,12 +31,11 @@ export const useUserStore = create<UserState>((set, get) => ({
   logout: () => set({ user: null, error: null, isInitialized: false }),
 
   fetchUser: async () => {
-    // ЗАЩИТА: Если код пытается выполнить это на сервере Next.js - мгновенно выходим
-    if (typeof window === 'undefined') return; 
+    // Если код пытается выполнить это на сервере Next.js - мгновенно выходим
+    if (typeof window === 'undefined') return;
     if (get().isLoading || get().isInitialized) return;
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-
     set({ isLoading: true, error: null });
 
     try {
@@ -43,19 +47,19 @@ export const useUserStore = create<UserState>((set, get) => ({
 
       if (!response.ok) throw new Error("Не удалось загрузить профиль");
 
-      const data: User = await response.json();
+      const rawData = await response.json();
+      const validatedUser = userSchema.parse(rawData);
 
-      set({ user: data, isLoading: false, isInitialized: true });
+      set({ user: validatedUser, isLoading: false, isInitialized: true });
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        set({ 
-          error: err.message, isLoading: false, isInitialized: true 
-        });
-      } else {
-        set({
-          error: "Произошла неизвестная ошибка", isLoading: false, isInitialized: true,
-        });
+      const errorMessage = err instanceof Error ? err.message : "Произошла неизвестная ошибка";
+      
+      if (err instanceof z.ZodError) {
+        const formattedErrors = z.treeifyError(err);
+        console.error("Бэкенд прислал некорректного пользователя:", formattedErrors);
       }
+
+      set({ error: errorMessage, isLoading: false, isInitialized: true });
     }
   },
 }));

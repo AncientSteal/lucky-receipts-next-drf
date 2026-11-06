@@ -1,14 +1,6 @@
-import { ExtendedReceipt } from "@/components/ReceiptList";
+import { ExtendedReceipt, paginatedReceiptsSchema } from "@/schemas/receipt.schema";
 import { create } from "zustand";
-
-export interface Receipt {
-  id: number;
-  fn: string;
-  fd: string;
-  fp: string;
-  purchase_date: string;
-  amount: number;
-}
+import { z } from 'zod';
 
 interface ReceiptsState {
   receipts: ExtendedReceipt[];
@@ -63,25 +55,33 @@ export const useReceiptsStore = create<ReceiptsState>((set, get) => ({
 
       if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
 
-      const data = await response.json();
+      const rawData = await response.json();
+      const validatedData = paginatedReceiptsSchema.parse(rawData);
+
       set({
-        receipts: data.results,
-        count: data.count,
+        receipts: validatedData.results,
+        count: validatedData.count,
         loading: false,
         abortController: null,
       });
     } catch (error: unknown) {
       const isTimeout = combinedSignal && combinedSignal.aborted && combinedSignal.reason?.name === "TimeoutError";
       if (isTimeout || (error instanceof Error && error.name === "TimeoutError")) {
-        set({ loading: false, abortController: null, error: "Превышено время ожидания" });; 
+        set({ loading: false, abortController: null, error: "Превышено время ожидания" });
+        return; 
       } 
 
       if (error instanceof Error) {
         if (error.name === "AbortError") {
           console.log("Запрос чеков отменен");
         } else {
-          console.error("Сетевая ошибка при загрузке чеков:", error);
-          set({ error: error.message, loading: false, abortController: null });
+          if (error instanceof z.ZodError) {
+            console.error("Ошибка структуры данных API чеков:", z.treeifyError(error));
+            set({ error: "Ошибка структуры данных API чеков.", loading: false, abortController: null });
+          } else {
+            console.error("Сетевая ошибка при загрузке чеков:", error);
+            set({ error: error.message, loading: false, abortController: null });
+          }
         }
       } else {
         set({
