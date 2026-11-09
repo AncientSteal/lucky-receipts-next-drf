@@ -1,16 +1,7 @@
 import Image from "next/image";
-import { Receipt } from "@/app/store/useReceiptsStore";
 import { AcceptedStatusIcon, CalendarIcon, CheckingStatusIcon, MoneyIcon, RejectedStatusIcon } from "./Icons";
 import "./ReceiptList.css";
-
-type ReceiptStatus = "accepted" | "rejected" | "checking";
-
-export interface ExtendedReceipt extends Receipt {
-  status: ReceiptStatus;
-  status_display: string;
-  registration_date: string;
-  reject_reason?: string;
-}
+import { ExtendedReceipt, ReceiptStatus } from "@/schemas/receipt.schema";
 
 interface ReceiptsListProps {
   receipts: ExtendedReceipt[];

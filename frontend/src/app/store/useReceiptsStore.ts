@@ -76,7 +76,7 @@ export const useReceiptsStore = create<ReceiptsState>((set, get) => ({
           console.log("Запрос чеков отменен");
         } else {
           if (error instanceof z.ZodError) {
-            console.error("Ошибка структуры данных API чеков:", z.treeifyError(error));
+            console.error("Ошибка структуры данных API чеков:", error.flatten().fieldErrors);
             set({ error: "Ошибка структуры данных API чеков.", loading: false, abortController: null });
           } else {
             console.error("Сетевая ошибка при загрузке чеков:", error);

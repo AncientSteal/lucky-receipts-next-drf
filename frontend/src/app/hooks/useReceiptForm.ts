@@ -1,11 +1,9 @@
-import { useState, ChangeEvent, FormEvent } from "react";
-import {
-  ReceiptFormData,
-  ReceiptFormErrors,
-  validateReceiptForm,
-} from "../utils/validateReceipt";
+import { useState, ChangeEvent } from "react";
 import { parseQrString } from "../utils/parseQrString";
 import { ApiError, createReceipt } from "../form/api";
+import { ReceiptFormData, receiptSchema } from "@/schemas/receipt.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 interface SubmitStatus {
   success: boolean | null;
@@ -13,28 +11,24 @@ interface SubmitStatus {
 }
 
 export function useReceiptForm(onSuccess?: () => void) {
-  const [formData, setFormData] = useState<ReceiptFormData>({
-    fn: "",
-    fd: "",
-    fp: "",
-    purchase_date: "",
-    amount: "",
-  });
   const [qrRawString, setQrRawString] = useState<string>("");
-  const [errors, setErrors] = useState<ReceiptFormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>({
     success: null,
     message: "",
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name as keyof ReceiptFormData]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    setError,
+    clearErrors,
+    formState: { errors, isSubmitting },
+  } = useForm<ReceiptFormData>({
+    resolver: zodResolver(receiptSchema),
+    mode: "onChange",
+    defaultValues: { fn: "", fd: "", fp: "", purchase_date: "", amount: "" },
+  });
 
   const handleQrChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -42,31 +36,40 @@ export function useReceiptForm(onSuccess?: () => void) {
 
     const parsedData = parseQrString(value);
     if (parsedData) {
-      setFormData(parsedData);
-      setErrors({});
+      Object.entries(parsedData).forEach(([key, val]) => {
+        setValue(key as keyof ReceiptFormData, val as string);
+      });
+      clearErrors();
     }
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onSubmit = async (data: ReceiptFormData) => {
     setSubmitStatus({ success: null, message: "" });
 
-    const validationErrors = validateReceiptForm(formData);
-    setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) return;
-
-    setIsSubmitting(true);
-
     try {
-      await createReceipt(formData);
-
+      await createReceipt(data);
       setSubmitStatus({
         success: true,
         message: "Чек успешно зарегистрирован и отправлен на модерацию!",
       });
-
       if (onSuccess) onSuccess();
     } catch (error: unknown) {
+      // Обработка ошибки сервера
+      if (error instanceof ApiError) {
+        const result = error.data;
+        if (result.purchase_date) {
+          setError("purchase_date", {
+            type: "server",
+            message: result.purchase_date,
+          });
+        }
+        setSubmitStatus({
+          success: false,
+          message:
+            result.non_field_errors || "Ошибка валидации данных на сервере.",
+        });
+        return;
+      }
       // Обработка системных ошибок (сеть, таймаут)
       const isTimeout = error instanceof Error && error.name === "TimeoutError";
       if (isTimeout) {
@@ -81,34 +84,16 @@ export function useReceiptForm(onSuccess?: () => void) {
           message: "Сетевая ошибка сервера. Попробуйте позже.",
         });
       }
-
-      // Обработка ошибки сервера
-      if (error instanceof ApiError) {
-        const result = error.data;
-        if (result.purchase_date) {
-          setErrors((prev) => ({
-            ...prev,
-            purchase_date: result.purchase_date,
-          }));
-        }
-        setSubmitStatus({
-          success: false,
-          message: result.non_field_errors || "Ошибка валидации данных на сервере." });
-        return;
-      }
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return {
-    formData,
+    register,
     qrRawString,
     errors,
     isSubmitting,
     submitStatus,
-    handleChange,
     handleQrChange,
-    handleSubmit,
+    onSubmit: handleSubmit(onSubmit),
   };
 }

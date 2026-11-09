@@ -5,9 +5,9 @@ import { z } from 'zod';
 export const userSchema = z.object({
   id: z.number(),
   username: z.string(),
-  email: z.email(),
-  first_name: z.string(),
-  last_name: z.string(),
+  email: z.string(),
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
 });
 
 // Автоматически получаем тип User для стейта
@@ -55,7 +55,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       const errorMessage = err instanceof Error ? err.message : "Произошла неизвестная ошибка";
       
       if (err instanceof z.ZodError) {
-        const formattedErrors = z.treeifyError(err);
+        const formattedErrors = err.flatten().fieldErrors;
         console.error("Бэкенд прислал некорректного пользователя:", formattedErrors);
       }
 

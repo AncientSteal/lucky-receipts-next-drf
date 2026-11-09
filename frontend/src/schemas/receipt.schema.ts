@@ -7,12 +7,12 @@ const digitsOnly = /^\d+$/;
 // БАЗОВАЯ СХЕМА (Чистые данные от API)
 // ==========================================
 export const apiReceiptSchema = z.object({
-  id: z.number(),
+  id: z.coerce.number(),
   fn: z.string(),
   fd: z.string(),
   fp: z.string(),
   purchase_date: z.string(),
-  amount: z.number(), // Число, как присылает бэкенд
+  amount: z.coerce.number(), // Число, как присылает бэкенд
 });
 
 // Схема статусов чека
@@ -23,7 +23,7 @@ export const extendedReceiptSchema = apiReceiptSchema.extend({
   status: receiptStatusSchema,
   status_display: z.string(),
   registration_date: z.string(),
-  reject_reason: z.string().optional(), 
+  reject_reason: z.string().nullable().optional(),
 });
 
 // Схема для пагинации (которую вызовет Zustand)

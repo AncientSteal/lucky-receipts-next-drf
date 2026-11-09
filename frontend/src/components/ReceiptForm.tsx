@@ -11,14 +11,13 @@ interface ReceiptFormProps {
 
 export default function ReceiptForm({ onSuccess, onClose }: ReceiptFormProps) {
   const {
-    formData,
+    register,
     qrRawString,
     errors,
     isSubmitting,
     submitStatus,
-    handleChange,
     handleQrChange,
-    handleSubmit,
+    onSubmit,
   } = useReceiptForm(onSuccess);
 
   return (
@@ -45,7 +44,7 @@ export default function ReceiptForm({ onSuccess, onClose }: ReceiptFormProps) {
             placeholder="Вставьте строку (пример: t=datetime&s=1500&fn=...)"
           />
         </div>
-        <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={onSubmit} noValidate>
           {submitStatus.message && (
             <div
               className={`form-alert ${submitStatus.success ? "alert-success" : "alert-error"}`}
@@ -59,16 +58,14 @@ export default function ReceiptForm({ onSuccess, onClose }: ReceiptFormProps) {
             <label>ФН</label>
             <input
               type="text"
-              name="fn"
-              value={formData.fn}
-              onChange={handleChange}
               className={errors.fn ? "input-error" : ""}
               placeholder="Введите ФН"
+              {...register('fn')}
             />
             {errors.fn && (
               <span className="error-text">
                 <DangerIcon />
-                {errors.fn}
+                {errors.fn.message}
               </span>
             )}
           </div>
@@ -77,16 +74,14 @@ export default function ReceiptForm({ onSuccess, onClose }: ReceiptFormProps) {
             <label>Номер чека</label>
             <input
               type="text"
-              name="fd"
-              value={formData.fd}
-              onChange={handleChange}
               className={errors.fd ? "input-error" : ""}
               placeholder="Введите номер чека (ФД)"
+              {...register('fd')}
             />
             {errors.fd && (
               <span className="error-text">
                 <DangerIcon />
-                {errors.fd}
+                {errors.fd.message}
               </span>
             )}
           </div>
@@ -95,16 +90,14 @@ export default function ReceiptForm({ onSuccess, onClose }: ReceiptFormProps) {
             <label>ФП</label>
             <input
               type="text"
-              name="fp"
-              value={formData.fp}
-              onChange={handleChange}
               className={errors.fp ? "input-error" : ""}
               placeholder="Введите ФП"
+              {...register('fp')}
             />
             {errors.fp && (
               <span className="error-text">
                 <DangerIcon />
-                {errors.fp}
+                {errors.fp.message}
               </span>
             )}
           </div>
@@ -113,15 +106,13 @@ export default function ReceiptForm({ onSuccess, onClose }: ReceiptFormProps) {
             <label>Дата покупки</label>
             <input
               type="datetime-local"
-              name="purchase_date"
-              value={formData.purchase_date}
-              onChange={handleChange}
               className={errors.purchase_date ? "input-error" : ""}
+              {...register('purchase_date')}
             />
             {errors.purchase_date && (
               <span className="error-text">
                 <DangerIcon />
-                {errors.purchase_date}
+                {errors.purchase_date.message}
               </span>
             )}
           </div>
@@ -130,16 +121,14 @@ export default function ReceiptForm({ onSuccess, onClose }: ReceiptFormProps) {
             <label>Сумма</label>
             <input
               type="number"
-              name="amount"
-              value={formData.amount}
-              onChange={handleChange}
               className={errors.amount ? "input-error" : ""}
               placeholder="Минимум 1000"
+              {...register('amount')}
             />
             {errors.amount && (
               <span className="error-text">
                 <DangerIcon />
-                {errors.amount}
+                {errors.amount.message}
               </span>
             )}
           </div>
