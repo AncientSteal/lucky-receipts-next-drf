@@ -21,6 +21,6 @@ from receipts.views import MainRedirectView
 urlpatterns = [
     path('', MainRedirectView.as_view(), name='main-index'),
     path('admin/', admin.site.urls),
-    path('api/', include('receipts.urls')),
+    path('api/', include('receipts.urls', '')),
     path('api-auth/', include('rest_framework.urls')),
 ]

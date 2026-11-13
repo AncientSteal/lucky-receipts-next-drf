@@ -1,17 +1,6 @@
 import { create } from "zustand";
 import { z } from 'zod';
-
-// Схема — единственный источник правды для данных пользователя
-export const userSchema = z.object({
-  id: z.number(),
-  username: z.string(),
-  email: z.string(),
-  first_name: z.string().optional(),
-  last_name: z.string().optional(),
-});
-
-// Автоматически получаем тип User для стейта
-export type User = z.infer<typeof userSchema>;
+import { User, userSchema } from "@/schemas/user.schema";
 
 interface UserState {
   user: User | null;

@@ -13,8 +13,8 @@ export function NavigationLinks({ pathname, setIsMenuOpen }: NavigationLinksProp
   return (
     <>
       <Link 
-        href="/" 
-        className={`nav-btn ${isActive("/")} button-navigation`}
+        href="/cabinet" 
+        className={`nav-btn ${isActive("/cabinet")} button-navigation`}
         onClick={() => setIsMenuOpen(false)}
       >
         <HomeIcon />

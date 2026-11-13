@@ -1,17 +1,10 @@
+import { ReceiptFormData } from "@/schemas/receipt.schema";
 import { getApiUrl } from "../utils/getApi";
 import { getCookieClient } from "../utils/getCookieClient";
 
-export interface ReceiptPayload {
-  fn: string;
-  fd: string;
-  fp: string;
-  purchase_date: string;
-  amount: string;
-}
-
 // Тип для ошибок валидации DRF, основанный на полях payload + общие ошибки
 export type ValidationErrorData = {
-  [K in keyof ReceiptPayload]?: string[];
+  [K in keyof ReceiptFormData]?: string[];
 } & {
   non_field_errors?: string[];
   detail?: string; // на случай стандартных ошибок DRF (например, 401 / 403)
@@ -30,7 +23,7 @@ export class ApiError<T = ValidationErrorData> extends Error {
   }
 }
 
-export async function createReceipt(payload: ReceiptPayload) {
+export async function createReceipt(payload: ReceiptFormData) {
   const apiUrl = getApiUrl();
   const controller = new AbortController();
   const timeoutSignal = AbortSignal.timeout(5000);

@@ -6,6 +6,7 @@
   --main-bg: #f5f7fa;
   --btn-active: #f0f3f7;
   --accent: #524fe5;
+  --pale-accent: #b4b3e7;
   --logo-bg: #8e8e8e;
   --fileds: 40px;
   --input-border: rgba(230, 232, 240, 1);
@@ -70,7 +71,7 @@ button {
   cursor: pointer;
   border-radius: 8px;
   padding: 8px 10px;
-  display: flex;
+  display: inline-flex;
   gap: 8px;
   align-items: center;
   transition: all ease-in-out 0.3s;
