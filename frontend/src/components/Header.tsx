@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link"; 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  ArrowIcon, CloseIcon, BurgerIcon,
-} from "./Icons";
+import { ArrowIcon, CloseIcon, BurgerIcon } from "./Icons";
 import "./Header.css";
 import { NavigationLinks } from "./NavigationLinks";
 import { ProfileBlock } from "./ProfileBlock";
+import { useUserStore } from "@/app/store/useUserStore";
 
 function LogoBlock() {
   return (
@@ -25,6 +24,8 @@ function LogoBlock() {
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const user = useUserStore((state) => state.user);
+  const logout = useUserStore((state) => state.logout);
 
   return (
     <header className="app-header">
@@ -39,9 +40,28 @@ export default function Header() {
             {isMenuOpen ? <CloseIcon /> : <BurgerIcon />}
           </button>
 
-          <nav className={`header-nav-mobile ${isMenuOpen ? "visible" : ""}`} aria-label="Мобильное меню">
+          <nav
+            className={`header-nav-mobile ${isMenuOpen ? "visible" : ""}`}
+            aria-label="Мобильное меню"
+          >
             <ProfileBlock />
-            <NavigationLinks pathname={pathname} setIsMenuOpen={setIsMenuOpen}/>
+            <NavigationLinks
+              pathname={pathname}
+              setIsMenuOpen={setIsMenuOpen}
+            />
+            {user === null ? (
+              <Link
+                href="/login"
+                className="btnLogin"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Войти
+              </Link>
+            ) : (
+              <button className="btnLogout" onClick={logout}>
+                Выйти
+              </button>
+            )}
           </nav>
 
           {isMenuOpen && (
@@ -54,7 +74,10 @@ export default function Header() {
         <div className="header-nav-desktop">
           <LogoBlock />
           <nav className="header-nav" aria-label="Основное меню">
-            <NavigationLinks pathname={pathname} setIsMenuOpen={setIsMenuOpen}/>
+            <NavigationLinks
+              pathname={pathname}
+              setIsMenuOpen={setIsMenuOpen}
+            />
           </nav>
 
           <ProfileBlock />

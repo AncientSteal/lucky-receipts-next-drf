@@ -105,6 +105,44 @@ input[type="datetime-local"] {
   transition: all ease-in-out 0.3s;
 }
 
+.btnLogin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  color: var(--bg);
+  background-color: var(--accent);
+  text-decoration: none;
+  transition: background-color ease-in-out 0.2s;
+}
+
+.btnLogout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  color: var(--text);
+  background-color: var(--pale-accent);
+  text-decoration: none;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.btnLogin:hover {
+  background-color: var(--pale-accent);
+  color: var(--text-h);
+}
+
+.btnLogout:hover {
+  background-color: var(--accent);
+  color: var(--pale-accent);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;

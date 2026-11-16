@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth import authenticate, login, logout
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")

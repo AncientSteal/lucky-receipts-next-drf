@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import styles from "./page.module.css";
+import "./globals.css";
 
 export default function HomePage() {
   return (
@@ -13,7 +14,7 @@ export default function HomePage() {
               <span className={styles.logoText}>Чек на удачу</span>
               <span className={styles.badge}>Акция 2026</span>
             </div>
-            <Link href="/login" className={styles.btnLogin}>
+            <Link href="/login" className="btnLogin">
               Войти
             </Link>
           </div>
@@ -34,7 +35,7 @@ export default function HomePage() {
               </p>
               <div className={styles.heroActions}>
                 <Link
-                  href="http://localhost:8000/api-auth/login/"
+                  href="/cabinet"
                   className={styles.btnPrimary}
                 >
                   Зарегистрировать чек

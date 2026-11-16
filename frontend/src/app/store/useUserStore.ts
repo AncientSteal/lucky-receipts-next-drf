@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { z } from 'zod';
 import { User, userSchema } from "@/schemas/user.schema";
+import { getCookieClient } from "../utils/getCookieClient";
 
 interface UserState {
   user: User | null;
@@ -17,7 +18,23 @@ export const useUserStore = create<UserState>((set, get) => ({
   isInitialized: false,
   error: null,
 
-  logout: () => set({ user: null, error: null, isInitialized: false }),
+  logout: async () => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+  try {
+    await fetch(`${apiUrl}/auth/logout/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookieClient("csrftoken") ?? "",
+      },
+      credentials: "include",
+    });
+  } catch (err) {
+    console.error("Ошибка при выходе:", err);
+  } finally {
+    set({ user: null, error: null, isInitialized: true });
+  }
+},
 
   fetchUser: async () => {
     // Если код пытается выполнить это на сервере Next.js - мгновенно выходим

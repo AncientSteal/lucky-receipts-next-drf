@@ -2,14 +2,37 @@ import Image from "next/image";
 import { AcceptedStatusIcon, CalendarIcon, CheckingStatusIcon, MoneyIcon, RejectedStatusIcon } from "./Icons";
 import "./ReceiptList.css";
 import { ExtendedReceipt, ReceiptStatus } from "@/schemas/receipt.schema";
+import { User } from "@/schemas/user.schema";
+import Link from "next/link";
 
 interface ReceiptsListProps {
   receipts: ExtendedReceipt[];
   loading: boolean;
+  user: User | null;
 }
 
-export default function ReceiptsList({ receipts, loading }: ReceiptsListProps) {
+export default function ReceiptsList({ receipts, loading, user }: ReceiptsListProps) {
   if (loading) return <div className="loading">Загрузка данных...</div>;
+  if (user === null) return (
+    <div className="empty-container">
+      <div className="empty-list-img">
+        <Image
+          src="/images/empty.svg"
+          alt="Требуется авторизация"
+          width={120}
+          height={120}
+          priority
+        />
+      </div>
+      <div className="empty-list-text">
+        <h3>Вы пока не вошли в аккаунт</h3>
+        <p>Авторизуйтесь или зарегистрируйтесь, чтобы добавлять чеки и следить за их статусом проверки</p>
+        <Link href="/login" className="auth-prompt-btn">
+          Войти в аккаунт
+        </Link>
+      </div>
+    </div>
+  );
   if (receipts.length === 0) return (
     <div className="empty-container">
       <div className="empty-list-img">

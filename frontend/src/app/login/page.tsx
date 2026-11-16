@@ -8,6 +8,7 @@ import styles from "./page.module.css";
 import { useLoginForm } from "../hooks/useLoginFrom";
 import { useRegisterForm } from "../hooks/useRegisterFrom";
 import { useUserStore } from "../store/useUserStore";
+import { DangerIcon } from "@/components/Icons";
 
 export default function LoginPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -60,7 +61,10 @@ export default function LoginPage() {
                   placeholder="Введите имя пользователя"
                 />
                 {loginForm.errors.username && (
-                  <p className={styles.errorText}>{loginForm.errors.username.message}</p>
+                  <span className={styles.errorText}>
+                    <DangerIcon />
+                    {loginForm.errors.username.message}
+                  </span>
                 )}
               </div>
 
@@ -73,12 +77,17 @@ export default function LoginPage() {
                   placeholder="••••••••"
                 />
                 {loginForm.errors.password && (
-                  <p className={styles.errorText}>{loginForm.errors.password.message}</p>
+                  <span className={styles.errorText}>
+                    <DangerIcon />
+                    {loginForm.errors.password.message}
+                  </span>
                 )}
               </div>
 
               {loginForm.submitStatus.success === false && (
-                <div className={styles.alertError}>{loginForm.submitStatus.message}</div>
+                <div className={styles.alertError}>
+                  {loginForm.submitStatus.message}
+                </div>
               )}
 
               <button
@@ -103,7 +112,9 @@ export default function LoginPage() {
                   placeholder="Придумайте логин"
                 />
                 {registerForm.errors.username && (
-                  <p className={styles.errorText}>{registerForm.errors.username.message}</p>
+                  <p className={styles.errorText}>
+                    {registerForm.errors.username.message}
+                  </p>
                 )}
               </div>
 
@@ -116,29 +127,29 @@ export default function LoginPage() {
                   placeholder="name@example.com"
                 />
                 {registerForm.errors.email && (
-                  <p className={styles.errorText}>{registerForm.errors.email.message}</p>
+                  <p className={styles.errorText}>
+                    {registerForm.errors.email.message}
+                  </p>
                 )}
               </div>
 
-              <div className={styles.rowTwo}>
-                <div className={styles.field}>
-                  <label className={styles.label}>Имя</label>
-                  <input
-                    type="text"
-                    {...registerForm.register("first_name")}
-                    className={styles.input}
-                    placeholder="Иван"
-                  />
-                </div>
-                <div className={styles.field}>
-                  <label className={styles.label}>Фамилия</label>
-                  <input
-                    type="text"
-                    {...registerForm.register("last_name")}
-                    className={styles.input}
-                    placeholder="Иванов"
-                  />
-                </div>
+              <div className={styles.field}>
+                <label className={styles.label}>Имя</label>
+                <input
+                  type="text"
+                  {...registerForm.register("first_name")}
+                  className={styles.input}
+                  placeholder="Иван"
+                />
+              </div>
+              <div className={styles.field}>
+                <label className={styles.label}>Фамилия</label>
+                <input
+                  type="text"
+                  {...registerForm.register("last_name")}
+                  className={styles.input}
+                  placeholder="Иванов"
+                />
               </div>
 
               <div className={styles.field}>
@@ -150,7 +161,9 @@ export default function LoginPage() {
                   placeholder="Минимум 8 символов"
                 />
                 {registerForm.errors.password && (
-                  <p className={styles.errorText}>{registerForm.errors.password.message}</p>
+                  <p className={styles.errorText}>
+                    {registerForm.errors.password.message}
+                  </p>
                 )}
               </div>
 
@@ -163,12 +176,16 @@ export default function LoginPage() {
                   placeholder="Повторите пароль"
                 />
                 {registerForm.errors.passwordConfirm && (
-                  <p className={styles.errorText}>{registerForm.errors.passwordConfirm.message}</p>
+                  <p className={styles.errorText}>
+                    {registerForm.errors.passwordConfirm.message}
+                  </p>
                 )}
               </div>
 
               {registerForm.serverError && (
-                <div className={styles.alertError}>{registerForm.serverError}</div>
+                <div className={styles.alertError}>
+                  {registerForm.serverError}
+                </div>
               )}
 
               <button
@@ -176,7 +193,9 @@ export default function LoginPage() {
                 disabled={registerForm.isSubmitting}
                 className={styles.submitBtn}
               >
-                {registerForm.isSubmitting ? "Регистрируем..." : "Зарегистрироваться"}
+                {registerForm.isSubmitting
+                  ? "Регистрируем..."
+                  : "Зарегистрироваться"}
               </button>
             </form>
           </>

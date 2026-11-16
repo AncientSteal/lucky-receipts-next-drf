@@ -6,7 +6,7 @@ import { z } from "zod";
 
 export const userSchema = z.object({
   id: z.number(),
-  username: z.string(),
+  username: z.string().min(4, "Минимум 4 символа"),
   email: z.string(),
   first_name: z.string().optional(),
   last_name: z.string().optional(),

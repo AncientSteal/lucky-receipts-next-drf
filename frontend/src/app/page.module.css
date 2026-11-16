@@ -79,20 +79,6 @@
   flex-wrap: wrap;
 }
 
-.btnLogin {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 24px;
-  font-size: 16px;
-  font-weight: 500;
-  border-radius: 8px;
-  color: var(--bg);
-  background-color: var(--accent);
-  text-decoration: none;
-  transition: background-color ease-in-out 0.2s;
-}
-
 .btnPrimary {
   display: inline-flex;
   align-items: center;

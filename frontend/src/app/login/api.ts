@@ -60,7 +60,7 @@ export async function sendAuthRequest(endpoint: string, payload: unknown): Promi
     throw new ApiError(response.status, result);
   }
 
-  return userSchema.parse(result);;
+  return userSchema.parse(result);
 }
 
 export const loginUser = (payload: LoginFormData) =>

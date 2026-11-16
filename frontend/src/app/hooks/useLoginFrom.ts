@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ApiError } from "../login/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { LoginFormData, loginSchema } from "@/schemas/user.schema";
+import { LoginFormData, loginSchema, User } from "@/schemas/user.schema";
 import { loginUser } from "../login/api";
 
 interface SubmitStatus {
@@ -10,7 +10,7 @@ interface SubmitStatus {
   message: string;
 }
 
-export function useLoginForm(onSuccess?: () => void) {
+export function useLoginForm(onSuccess?: (user?: User) => void) {
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>({
     success: null,
     message: "",
@@ -30,12 +30,13 @@ export function useLoginForm(onSuccess?: () => void) {
     setSubmitStatus({ success: null, message: "" });
 
     try {
+      const user = await loginUser(data);
       await loginUser(data);
       setSubmitStatus({
         success: true,
         message: "Вход выполнен успешно!",
       });
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(user);
     } catch (error: unknown) {
       // Обработка ошибки сервера
       if (error instanceof ApiError) {
