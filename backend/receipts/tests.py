@@ -123,25 +123,27 @@ def test_receipt_unique_constraint(promo_dates, test_user):
 # --- ТЕСТЫ ДЛЯ MAIN_REDIRECT_VIEW ---
 @pytest.mark.django_db
 def test_main_redirect_anonymous_user(client):
-    """Анонимного пользователя с главной страницы должно редиректить на логин React (порт 3000)"""
+    """Анонимного пользователя с главной страницы должно редиректить на главную страницу React"""
     # reverse('main-index') автоматически вычислит путь "/" из urls.py
     response = client.get(reverse('main-index'))
+    base_url = settings.FRONTEND_URL.rstrip('/')
 
     # Проверяем, что сервер возвращает статус редиректа (302)
     assert response.status_code == 302
-    assert response.url == 'http://localhost:3000/'
+    assert response.url == f'{base_url}/'
 
 
 @pytest.mark.django_db
 def test_main_redirect_authenticated_user(client, test_user):
-    """ Авторизованного пользователя должно редиректить на React (порт 3000)"""
+    """ Авторизованного пользователя должно редиректить на личный кабинет React"""
     # Логиним пользователя в нашем тестовом браузере
     client.force_login(test_user)
 
     response = client.get(reverse('main-index'))
+    base_url = settings.FRONTEND_URL.rstrip('/')
 
     assert response.status_code == 302
-    assert response.url == 'http://localhost:3000/'
+    assert response.url == f'{base_url}/cabinet/'
 
 
 # --- ТЕСТЫ НА БЕЗОПАСНОСТЬ VIEWSET (Ограничение чужих чеков) ---

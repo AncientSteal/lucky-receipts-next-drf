@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RegisterFormData, registerSchema, User } from "@/schemas/user.schema";
 import { ApiError, registerUser } from "../login/api";
+import { applyFieldErrors, getErrorMessage } from "../utils/getErrorMessage";
 
 export function useRegisterForm(onSuccess?: (user: User) => void) {
   const [serverError, setServerError] = useState<string>("");
@@ -32,28 +33,11 @@ export function useRegisterForm(onSuccess?: (user: User) => void) {
       const user = await registerUser(data);
       if (onSuccess) onSuccess(user);
     } catch (error: unknown) {
-      if (error instanceof ApiError) {
-        const result = error.data;
-        // Пробрасываем ошибки конкретных полей от DRF в форму
-        (Object.keys(result) as Array<keyof RegisterFormData>).forEach((field) => {
-          const messages = result[field];
-          if (Array.isArray(messages) && messages.length > 0) {
-            setError(field, { type: "server", message: messages[0] });
-          }
-        });
+      const hasFieldErrors = applyFieldErrors(error, setError);
 
-        if (result.non_field_errors?.[0] || result.detail) {
-          setServerError(result.non_field_errors?.[0] || result.detail || "");
-        }
-        return;
+      if (!hasFieldErrors || (error instanceof ApiError && (error.data.non_field_errors || error.data.detail || error.status === 429))) {
+        setServerError(getErrorMessage(error, "Проверьте правильность заполнения полей."));
       }
-
-      const isTimeout = error instanceof Error && error.name === "TimeoutError";
-      setServerError(
-        isTimeout
-          ? "Сервер отвечает слишком долго. Попробуйте позже."
-          : "Сетевая ошибка сервера. Попробуйте позже."
-      );
     }
   };
 

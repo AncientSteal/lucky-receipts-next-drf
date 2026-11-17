@@ -4,6 +4,8 @@ import { ApiError, createReceipt } from "../form/api";
 import { ReceiptFormData, receiptSchema } from "@/schemas/receipt.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { applyFieldErrors, getErrorMessage } from "../utils/getErrorMessage";
 
 interface SubmitStatus {
   success: boolean | null;
@@ -16,6 +18,7 @@ export function useReceiptForm(onSuccess?: () => void) {
     success: null,
     message: "",
   });
+  const router = useRouter();
 
   const {
     register,
@@ -54,34 +57,22 @@ export function useReceiptForm(onSuccess?: () => void) {
       });
       if (onSuccess) onSuccess();
     } catch (error: unknown) {
-      // Обработка ошибки сервера
-      if (error instanceof ApiError) {
-        const result = error.data;
-        if (result.purchase_date) {
-          setError("purchase_date", {
-            type: "server",
-            message: result.purchase_date,
-          });
-        }
-        setSubmitStatus({
-          success: false,
-          message:
-            result.non_field_errors || "Ошибка валидации данных на сервере.",
-        });
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+        router.push("/login");
         return;
       }
-      // Обработка системных ошибок (сеть, таймаут)
-      const isTimeout = error instanceof Error && error.name === "TimeoutError";
-      if (isTimeout) {
+
+      // Пробрасываем ошибки конкретных полей от DRF (например, purchase_date или дубликат fn/fd/fp)
+      const hasFieldErrors = applyFieldErrors(error, setError);
+
+      // Если это не ошибка конкретного поля (или есть общая ошибка / 429 / таймаут) — показываем плашку
+      if (
+        !hasFieldErrors ||
+        (error instanceof ApiError && (error.data.non_field_errors || error.data.detail || error.status === 429))
+      ) {
         setSubmitStatus({
           success: false,
-          message:
-            "Сервер отвечает слишком долго. Проверьте соединение и попробуйте позже.",
-        });
-      } else {
-        setSubmitStatus({
-          success: false,
-          message: "Сетевая ошибка сервера. Попробуйте позже.",
+          message: getErrorMessage(error, "Ошибка валидации данных на сервере."),
         });
       }
     }

@@ -29,6 +29,8 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,backend').split(',')
 
+FRONTEND_URL = os.getenv("FRONTEND_URL", 'http://localhost:3000')
+
 
 # Application definition
 
@@ -154,3 +156,30 @@ CSRF_TRUSTED_ORIGINS = [
 LOGIN_REDIRECT_URL = '/'
 
 APPEND_SLASH = False
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] {levelname} {name}: {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_THROTTLE_RATES": {
+        "auth": "5/min",
+    }
+}

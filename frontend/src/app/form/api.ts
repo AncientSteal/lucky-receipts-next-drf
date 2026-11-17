@@ -1,6 +1,7 @@
 import { ReceiptFormData } from "@/schemas/receipt.schema";
 import { getApiUrl } from "../utils/getApi";
 import { getCookieClient } from "../utils/getCookieClient";
+import { useUserStore } from "../store/useUserStore";
 
 // Тип для ошибок валидации DRF, основанный на полях payload + общие ошибки
 export type ValidationErrorData = {
@@ -39,13 +40,20 @@ export async function createReceipt(payload: ReceiptFormData) {
     body: JSON.stringify({
       ...payload,
       // сразу к ISO для бэкенда
-      purchase_date: payload.purchase_date ? new Date(payload.purchase_date).toISOString() : "",
+      purchase_date: payload.purchase_date
+        ? new Date(payload.purchase_date).toISOString()
+        : "",
     }),
     credentials: "include",
   });
 
+  if (response.status === 401 || response.status === 403) {
+    useUserStore.setState({ user: null, isInitialized: true, error: null });
+    throw new ApiError(response.status, { detail: "Сессия истекла. Войдите заново." });
+  }
+
   const result = await response.json();
-  
+
   if (!response.ok) {
     // Выбрасываем краш, чтобы хук мог обработать
     throw new ApiError(response.status, result);

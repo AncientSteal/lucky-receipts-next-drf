@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { z } from 'zod';
+import { z } from "zod";
 import { User, userSchema } from "@/schemas/user.schema";
 import { getCookieClient } from "../utils/getCookieClient";
 
@@ -19,29 +19,31 @@ export const useUserStore = create<UserState>((set, get) => ({
   error: null,
 
   logout: async () => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
-  try {
-    await fetch(`${apiUrl}/auth/logout/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCookieClient("csrftoken") ?? "",
-      },
-      credentials: "include",
-    });
-  } catch (err) {
-    console.error("Ошибка при выходе:", err);
-  } finally {
-    set({ user: null, error: null, isInitialized: true });
-  }
-},
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+    try {
+      await fetch(`${apiUrl}/auth/logout/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookieClient("csrftoken") ?? "",
+        },
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Ошибка при выходе:", err);
+    } finally {
+      set({ user: null, error: null, isInitialized: true });
+    }
+  },
 
   fetchUser: async () => {
     // Если код пытается выполнить это на сервере Next.js - мгновенно выходим
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     if (get().isLoading || get().isInitialized) return;
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
     set({ isLoading: true, error: null });
 
     try {
@@ -58,11 +60,15 @@ export const useUserStore = create<UserState>((set, get) => ({
 
       set({ user: validatedUser, isLoading: false, isInitialized: true });
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Произошла неизвестная ошибка";
-      
+      const errorMessage =
+        err instanceof Error ? err.message : "Произошла неизвестная ошибка";
+
       if (err instanceof z.ZodError) {
         const formattedErrors = err.flatten().fieldErrors;
-        console.error("Бэкенд прислал некорректного пользователя:", formattedErrors);
+        console.error(
+          "Бэкенд прислал некорректного пользователя:",
+          formattedErrors,
+        );
       }
 
       set({ error: errorMessage, isLoading: false, isInitialized: true });

@@ -1,6 +1,11 @@
-import { ExtendedReceipt, paginatedReceiptsSchema } from "@/schemas/receipt.schema";
+import {
+  ExtendedReceipt,
+  paginatedReceiptsSchema,
+} from "@/schemas/receipt.schema";
 import { create } from "zustand";
-import { z } from 'zod';
+import { z } from "zod";
+import { getApiUrl } from "../utils/getApi";
+import { useUserStore } from "./useUserStore";
 
 interface ReceiptsState {
   receipts: ExtendedReceipt[];
@@ -41,7 +46,7 @@ export const useReceiptsStore = create<ReceiptsState>((set, get) => ({
 
     set({ loading: true, error: null, abortController: controller });
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+    const apiUrl = getApiUrl();
 
     try {
       const response = await fetch(`${apiUrl}/receipts/?page=${targetPage}`, {
@@ -52,6 +57,16 @@ export const useReceiptsStore = create<ReceiptsState>((set, get) => ({
         credentials: "include",
         signal: combinedSignal,
       });
+
+      if (response.status === 401 || response.status === 403) {
+        if (useUserStore.getState().user !== null) {
+          useUserStore.setState({ 
+            user: null, isInitialized: true, error: null,
+          });
+        }
+        set({ receipts: [], count: 0, loading: false, abortController: null });
+        return;
+      }
 
       if (!response.ok) throw new Error(`Ошибка сервера: ${response.status}`);
 
@@ -65,30 +80,52 @@ export const useReceiptsStore = create<ReceiptsState>((set, get) => ({
         abortController: null,
       });
     } catch (error: unknown) {
-      const isTimeout = combinedSignal && combinedSignal.aborted && combinedSignal.reason?.name === "TimeoutError";
-      if (isTimeout || (error instanceof Error && error.name === "TimeoutError")) {
-        set({ loading: false, abortController: null, error: "Превышено время ожидания" });
-        return; 
-      } 
+      const isTimeout =
+        combinedSignal &&
+        combinedSignal.aborted &&
+        combinedSignal.reason?.name === "TimeoutError";
+      if (
+        isTimeout ||
+        (error instanceof Error && error.name === "TimeoutError")
+      ) {
+        set({
+          loading: false,
+          abortController: null,
+          error: "Превышено время ожидания",
+        });
+        return;
+      }
 
       if (error instanceof Error) {
         if (error.name === "AbortError") {
           console.log("Запрос чеков отменен");
         } else {
           if (error instanceof z.ZodError) {
-            console.error("Ошибка структуры данных API чеков:", error.flatten().fieldErrors);
-            set({ error: "Ошибка структуры данных API чеков.", loading: false, abortController: null });
+            console.error(
+              "Ошибка структуры данных API чеков:",
+              error.flatten().fieldErrors,
+            );
+            set({
+              error: "Ошибка структуры данных API чеков.",
+              loading: false,
+              abortController: null,
+            });
           } else {
             console.error("Сетевая ошибка при загрузке чеков:", error);
-            set({ error: error.message, loading: false, abortController: null });
+            set({
+              error: error.message,
+              loading: false,
+              abortController: null,
+            });
           }
         }
       } else {
         set({
-          error: "Произошла неизвестная ошибка", loading: false, abortController: null 
+          error: "Произошла неизвестная ошибка",
+          loading: false,
+          abortController: null,
         });
       }
-      
     }
   },
 }));

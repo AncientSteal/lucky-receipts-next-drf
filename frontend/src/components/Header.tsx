@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ArrowIcon, CloseIcon, BurgerIcon } from "./Icons";
 import "./Header.css";
 import { NavigationLinks } from "./NavigationLinks";
@@ -26,6 +26,7 @@ export default function Header() {
   const pathname = usePathname();
   const user = useUserStore((state) => state.user);
   const logout = useUserStore((state) => state.logout);
+  const router = useRouter();
 
   return (
     <header className="app-header">
@@ -58,7 +59,7 @@ export default function Header() {
                 Войти
               </Link>
             ) : (
-              <button className="btnLogout" onClick={logout}>
+              <button className="btnLogout" onClick={async () => { await logout(); setIsMenuOpen(false); router.push("/login");}}>
                 Выйти
               </button>
             )}

@@ -8,6 +8,12 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth import authenticate, login, logout
+from django.conf import settings
+from rest_framework.exceptions import ValidationError
+from .throttles import AuthRateThrottle
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
@@ -19,6 +25,7 @@ class CsrfTokenView(APIView):
 
 
 class LoginView(APIView):
+    throttle_classes = [AuthRateThrottle]
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -27,12 +34,14 @@ class LoginView(APIView):
 
         user = authenticate(request, username=username, password=password)
         if user is None:
+            logger.warning("Failed login attempt for username: %s", username)
             return Response(
                 {"non_field_errors": ["Неверное имя пользователя или пароль."]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         login(request, user)
+        logger.info("User logged in successfully: %s (id=%s)", user.username, user.id)
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -42,17 +51,26 @@ class LogoutView(APIView):
 
     def post(self, request):
         logout(request)
+        logger.info("User logout: %s", request.username)
         return Response({"detail": "Выход выполнен."}, status=status.HTTP_200_OK)
 
 
 class RegistrationView(APIView):
+    throttle_classes = [AuthRateThrottle]
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError as exc:
+            logger.warning("Registration failed: %s", exc.detail)
+            raise  # пробрасываем исключение дальше
+
         user = serializer.save()
+
         login(request, user)
+        logger.info("New user registered: %s (id=%s)", user.username, user.id)
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
@@ -91,8 +109,9 @@ class ReceiptViewSet(mixins.ListModelMixin,
 
 class MainRedirectView(View):
     def get(self, request, *args, **kwargs):
+        base_url = settings.FRONTEND_URL.rstrip('/')
         if request.user.is_authenticated:
-            # пользователь вошел — отправляем на фронтенд
-            return redirect('http://localhost:3000/')
+            # пользователь вошел — отправляем на фронтенд личного кабинета
+            return redirect(f'{base_url}/cabinet/')
         # пользователь не вошел — отправляем на главную страницу фронта
-        return redirect('http://localhost:3000/')
+        return redirect(f'{base_url}/')

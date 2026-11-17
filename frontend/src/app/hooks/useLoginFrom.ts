@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { ApiError } from "../login/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { LoginFormData, loginSchema, User } from "@/schemas/user.schema";
 import { loginUser } from "../login/api";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 interface SubmitStatus {
   success: boolean | null;
@@ -23,7 +23,7 @@ export function useLoginForm(onSuccess?: (user?: User) => void) {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     mode: "onChange",
-    defaultValues: { username: '', password: '' },
+    defaultValues: { username: "", password: "" },
   });
 
   const onSubmit = async (data: LoginFormData) => {
@@ -38,30 +38,11 @@ export function useLoginForm(onSuccess?: (user?: User) => void) {
       });
       if (onSuccess) onSuccess(user);
     } catch (error: unknown) {
-      // Обработка ошибки сервера
-      if (error instanceof ApiError) {
-        const result = error.data;
-        setSubmitStatus({
-          success: false,
-          message:
-            result.non_field_errors || "Ошибка валидации данных на сервере.",
-        });
-        return;
-      }
-      // Обработка системных ошибок (сеть, таймаут)
-      const isTimeout = error instanceof Error && error.name === "TimeoutError";
-      if (isTimeout) {
-        setSubmitStatus({
-          success: false,
-          message:
-            "Сервер отвечает слишком долго. Проверьте соединение и попробуйте позже.",
-        });
-      } else {
-        setSubmitStatus({
-          success: false,
-          message: "Сетевая ошибка сервера. Попробуйте позже.",
-        });
-      }
+      setSubmitStatus({
+        success: false,
+        message: getErrorMessage( error, "Неверное имя пользователя или пароль.",
+        ),
+      });
     }
   };
 
