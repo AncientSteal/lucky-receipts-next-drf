@@ -20,7 +20,7 @@ export default function CabinetScreen() {
     <section className="screen-cabinet">
       <div className="list-header">
         <h3>История чеков</h3>
-        {user && (
+        {!isLoading && user && (
           <div className="list-count">
             <p>
               Чеков внесено: <span>{count} шт.</span>
@@ -31,11 +31,13 @@ export default function CabinetScreen() {
 
       <ReceiptsList receipts={receipts} loading={isLoading} user={user}/>
 
-      {!isLoading && (
-        <Pagination count={count} currentPage={page} setPage={setPage} />
+      {!isLoading && user && (
+        <>
+          <Pagination count={count} currentPage={page} setPage={setPage} />
+          <ListFooter count={count} />
+        </>
       )}
 
-      {!isLoading && user && <ListFooter count={count} />}
     </section>
   );
 }

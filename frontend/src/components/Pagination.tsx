@@ -8,8 +8,9 @@ interface PaginationProps {
   setPage: (page: number) => void;
 }
 
+const pageSize = 10;
+
 export default function Pagination({ count, currentPage, setPage }: PaginationProps) {
-  const pageSize = 10;
   const totalPages = Math.ceil(count / pageSize);
 
   const visiblePages = useMemo(() => {
@@ -48,7 +49,9 @@ export default function Pagination({ count, currentPage, setPage }: PaginationPr
   return (
     <div className="pagination-container">
       <button
+        type="button"
         className="pag-btn pag-prev"
+        aria-label="Предыдущая страница"
         disabled={currentPage === 1}
         onClick={() => {
           setPage(currentPage - 1);
@@ -77,7 +80,9 @@ export default function Pagination({ count, currentPage, setPage }: PaginationPr
       </div>
 
       <button
+        type="button"
         className="pag-btn pag-next"
+        aria-label="Следующая страница"
         disabled={currentPage === totalPages}
         onClick={() => {
           setPage(currentPage + 1);

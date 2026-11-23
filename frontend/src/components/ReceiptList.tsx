@@ -11,6 +11,28 @@ interface ReceiptsListProps {
   user: User | null;
 }
 
+// форматтеры создаются один раз при инициализации
+const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
+const amountFormatter = new Intl.NumberFormat('ru-RU');
+
+const formatDate = (dateString: string): string => {
+  return dateFormatter.format(new Date(dateString));
+};
+
+// хэлпер чтобы подобрать класс / икнонку по статусу
+const STATUS_CONFIG: Record<string, { className: string; icon: React.ReactNode }> = {
+  accepted: { className: 'status-accepted', icon: <AcceptedStatusIcon /> },
+  rejected: { className: 'status-rejected', icon: <RejectedStatusIcon /> },
+  checking: { className: 'status-checking', icon: <CheckingStatusIcon /> },
+};
+
 export default function ReceiptsList({ receipts, loading, user }: ReceiptsListProps) {
   if (loading) return <div className="loading">Загрузка данных...</div>;
   if (user === null) return (
@@ -51,34 +73,6 @@ export default function ReceiptsList({ receipts, loading, user }: ReceiptsListPr
     </div>
   );
 
-  // Функция для подбора CSS-класса под статус чека
-  const getStatusClass = (status: ReceiptStatus) => {
-    switch (status) {
-      case 'accepted': return 'status-accepted';
-      case 'rejected': return 'status-rejected';
-      default: return 'status-checking';
-    }
-  };
-
-  const getStatusIcon = (status: ReceiptStatus) => {
-    switch (status) {
-      case 'accepted': return <AcceptedStatusIcon />;
-      case 'rejected': return <RejectedStatusIcon />;
-      default: return <CheckingStatusIcon />;
-    }
-  }
-
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   return (
       <div className="table-container">
         <table className="receipts-table">
@@ -92,26 +86,29 @@ export default function ReceiptsList({ receipts, loading, user }: ReceiptsListPr
             </tr>
           </thead>
           <tbody>
-            {receipts.map((receipt) => (
-              <tr key={receipt.id}>
-                <td>{formatDate(receipt.purchase_date)}</td>
-                <td>
-                  <span className={`status-badge ${getStatusClass(receipt.status)}`}>
-                    {getStatusIcon(receipt.status)}
-                    {receipt.status_display}
-                  </span>
-                </td>
-                <td className="amount-cell">
-                  <MoneyIcon /> {parseFloat(String(receipt.amount)).toLocaleString('ru-RU')} ₽
-                </td>
-                <td>
-                  <CalendarIcon />{formatDate(receipt.registration_date)}
-                </td>
-                <td className="reason-cell">
-                  {receipt.status === 'rejected' ? receipt.reject_reason : ''}
-                </td>
-              </tr>
-            ))}
+            {receipts.map((receipt) => {
+              const statusInfo = STATUS_CONFIG[receipt.status] ?? STATUS_CONFIG.checking;
+              return (
+                <tr key={receipt.id}>
+                  <td>{formatDate(receipt.purchase_date)}</td>
+                  <td>
+                    <span className={`status-badge ${statusInfo.className}`}>
+                      {statusInfo.icon}
+                      {receipt.status_display}
+                    </span>
+                  </td>
+                  <td className="amount-cell">
+                    <MoneyIcon /> {amountFormatter.format(Number(receipt.amount))} ₽
+                  </td>
+                  <td>
+                    <CalendarIcon />{formatDate(receipt.registration_date)}
+                  </td>
+                  <td className="reason-cell">
+                    {receipt.status === 'rejected' ? receipt.reject_reason : ''}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

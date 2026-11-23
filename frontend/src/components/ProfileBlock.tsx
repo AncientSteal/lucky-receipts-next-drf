@@ -1,13 +1,14 @@
 import { useUserStore } from "@/app/store/useUserStore";
 import { SignIcon } from "./Icons";
+import { useShallow } from "zustand/shallow";
 
 export function ProfileBlock() {
-  const user = useUserStore((state) => state.user);
-  const userName = user?.username || "User";
-  const userEmail = user?.email || "email не указан";
-  const isInitialized = useUserStore((state) => state.isInitialized);
-
-  console.log("РЕНДЕР ПРОФИЛЯ:", { username: user?.username, isInitialized });
+  const { userName, userEmail } = useUserStore(
+    useShallow((state) => ({
+      userName: state.user?.username || "User",
+      userEmail: state.user?.email || "email не указан",
+    }))
+  );
 
   return (
     <div className="header-profile">
