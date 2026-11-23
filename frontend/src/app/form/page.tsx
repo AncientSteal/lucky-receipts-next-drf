@@ -8,7 +8,7 @@ export default function FormPage() {
   const router = useRouter();
 
   const handleFormSuccess = () => {
-    useReceiptsStore.getState().fetchReceipts(1); // Вызов напрямую из стора
+    useReceiptsStore.getState().setPage(1); // Вызов напрямую из стора
     router.push("/form/success");
   };
 

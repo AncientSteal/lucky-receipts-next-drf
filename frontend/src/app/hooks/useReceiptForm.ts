@@ -1,11 +1,13 @@
 import { useState, ChangeEvent } from "react";
 import { parseQrString } from "../utils/parseQrString";
-import { ApiError, createReceipt } from "../form/api";
+import { createReceipt } from "../form/api";
 import { ReceiptFormData, receiptSchema } from "@/schemas/receipt.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { applyFieldErrors, getErrorMessage } from "../utils/getErrorMessage";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ApiError, BaseValidationErrors } from "../utils/apiError";
 
 interface SubmitStatus {
   success: boolean | null;
@@ -19,6 +21,7 @@ export function useReceiptForm(onSuccess?: () => void) {
     message: "",
   });
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -26,11 +29,51 @@ export function useReceiptForm(onSuccess?: () => void) {
     setValue,
     setError,
     clearErrors,
-    formState: { errors, isSubmitting },
+    reset,
+    formState: { errors },
   } = useForm<ReceiptFormData>({
     resolver: zodResolver(receiptSchema),
     mode: "onChange",
     defaultValues: { fn: "", fd: "", fp: "", purchase_date: "", amount: "" },
+  });
+
+  // Описываем мутацию создания чека
+  const createReceiptMutation = useMutation({
+    mutationFn: (data: ReceiptFormData) => createReceipt(data),
+    onSuccess: async () => {
+      // Помечаем все страницы в словаре чеков как устаревшие
+      await queryClient.invalidateQueries({ queryKey: ["receipts"] });
+
+      setSubmitStatus({
+        success: true,
+        message: "Чек успешно зарегистрирован и отправлен на модерацию!",
+      });
+      reset(); // Очищаем форму
+      setQrRawString("");
+
+      if (onSuccess) onSuccess();
+    },
+    onError: (error: unknown) => {
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+        queryClient.setQueryData(["user"], null);
+        router.push("/login");
+        return;
+      }
+
+      // Пробрасываем ошибки конкретных полей от DRF в инпуты
+      const hasFieldErrors = applyFieldErrors(error, setError);
+
+      // Если это не ошибка конкретного поля (или общие ошибки) — показываем плашку с текстом
+      if (
+        !hasFieldErrors ||
+        (error instanceof ApiError && (error.data.non_field_errors || error.data.detail || error.status === 429))
+      ) {
+        setSubmitStatus({
+          success: false,
+          message: getErrorMessage(error, "Ошибка валидации данных на сервере."),
+        });
+      }
+    },
   });
 
   const handleQrChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -48,41 +91,14 @@ export function useReceiptForm(onSuccess?: () => void) {
 
   const onSubmit = async (data: ReceiptFormData) => {
     setSubmitStatus({ success: null, message: "" });
-
-    try {
-      await createReceipt(data);
-      setSubmitStatus({
-        success: true,
-        message: "Чек успешно зарегистрирован и отправлен на модерацию!",
-      });
-      if (onSuccess) onSuccess();
-    } catch (error: unknown) {
-      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
-        router.push("/login");
-        return;
-      }
-
-      // Пробрасываем ошибки конкретных полей от DRF (например, purchase_date или дубликат fn/fd/fp)
-      const hasFieldErrors = applyFieldErrors(error, setError);
-
-      // Если это не ошибка конкретного поля (или есть общая ошибка / 429 / таймаут) — показываем плашку
-      if (
-        !hasFieldErrors ||
-        (error instanceof ApiError && (error.data.non_field_errors || error.data.detail || error.status === 429))
-      ) {
-        setSubmitStatus({
-          success: false,
-          message: getErrorMessage(error, "Ошибка валидации данных на сервере."),
-        });
-      }
-    }
-  };
+    createReceiptMutation.mutate(data);
+  }
 
   return {
     register,
     qrRawString,
     errors,
-    isSubmitting,
+    isSubmitting: createReceiptMutation.isPending,
     submitStatus,
     handleQrChange,
     onSubmit: handleSubmit(onSubmit),

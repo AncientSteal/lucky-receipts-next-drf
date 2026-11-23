@@ -7,16 +7,24 @@ import { User } from "@/schemas/user.schema";
 import styles from "./page.module.css";
 import { useLoginForm } from "../hooks/useLoginFrom";
 import { useRegisterForm } from "../hooks/useRegisterFrom";
-import { useUserStore } from "../store/useUserStore";
 import { DangerIcon } from "@/components/Icons";
+import { useQueryClient } from "@tanstack/react-query";
+import { useReceiptsStore } from "../store/useReceiptsStore";
 
 export default function LoginPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const handleAuthSuccess = (user?: User) => {
+    // Сносим из памяти любые чеки предыдущей сессии
+    queryClient.removeQueries({ queryKey: ["receipts"] });
+    // Сбрасываем пагинацию на 1-ю страницу
+    useReceiptsStore.getState().setPage(1);
     if (user) {
-      useUserStore.setState({ user, isInitialized: true, error: null });
+      queryClient.setQueryData(["user"], user);
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["user"] });
     }
     router.push("/cabinet");
   };

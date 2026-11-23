@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RegisterFormData, registerSchema, User } from "@/schemas/user.schema";
-import { ApiError, registerUser } from "../login/api";
+import { registerUser } from "../login/api";
 import { applyFieldErrors, getErrorMessage } from "../utils/getErrorMessage";
+import { ApiError } from "../utils/apiError";
 
 export function useRegisterForm(onSuccess?: (user: User) => void) {
   const [serverError, setServerError] = useState<string>("");

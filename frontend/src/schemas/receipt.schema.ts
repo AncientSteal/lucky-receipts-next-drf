@@ -35,6 +35,7 @@ export const paginatedReceiptsSchema = z.object({
 // Типы для бэкенд-данных
 export type Receipt = z.infer<typeof apiReceiptSchema>;
 export type ExtendedReceipt = z.infer<typeof extendedReceiptSchema>;
+export type PaginatedReceipts = z.infer<typeof paginatedReceiptsSchema>
 
 // ==========================================
 // UI СХЕМА (Для формы создания чека)

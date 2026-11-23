@@ -7,7 +7,7 @@ import { ArrowIcon, CloseIcon, BurgerIcon } from "./Icons";
 import "./Header.css";
 import { NavigationLinks } from "./NavigationLinks";
 import { ProfileBlock } from "./ProfileBlock";
-import { useUserStore } from "@/app/store/useUserStore";
+import { useLogoutMutation, useUserQuery } from "@/app/hooks/useUser";
 
 function LogoBlock() {
   return (
@@ -24,8 +24,8 @@ function LogoBlock() {
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  const user = useUserStore((state) => state.user);
-  const logout = useUserStore((state) => state.logout);
+  const { data: user } = useUserQuery();
+  const { mutate: logout } = useLogoutMutation();
   const router = useRouter();
 
   return (

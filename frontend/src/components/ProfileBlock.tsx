@@ -1,14 +1,11 @@
-import { useUserStore } from "@/app/store/useUserStore";
 import { SignIcon } from "./Icons";
-import { useShallow } from "zustand/shallow";
+import { useUserQuery } from "@/app/hooks/useUser";
 
 export function ProfileBlock() {
-  const { userName, userEmail } = useUserStore(
-    useShallow((state) => ({
-      userName: state.user?.username || "User",
-      userEmail: state.user?.email || "email не указан",
-    }))
-  );
+  const { data: user } = useUserQuery();
+
+  const userName = user?.username || "User";
+  const userEmail = user?.email || "email не указан";
 
   return (
     <div className="header-profile">

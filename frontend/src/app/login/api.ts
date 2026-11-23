@@ -1,27 +1,7 @@
 import { LoginFormData, RegisterFormData, User, userSchema } from "@/schemas/user.schema";
 import { getApiUrl } from "../utils/getApi";
 import { getCookieClient } from "../utils/getCookieClient";
-
-// Тип для ошибок валидации DRF, основанный на полях payload + общие ошибки
-export type ValidationErrorData = {
-  [K in keyof LoginFormData]?: string[];
-} & {
-  non_field_errors?: string[];
-  detail?: string; // на случай стандартных ошибок DRF (например, 401 / 403)
-};
-
-export class ApiError<T = ValidationErrorData> extends Error {
-  public data: T;
-  public status: number;
-  public isServerError = true;
-
-  constructor(status: number, data: T) {
-    super("API Server Error");
-    this.name = "ApiError";
-    this.status = status;
-    this.data = data;
-  }
-}
+import { ApiError, BaseValidationErrors } from "../utils/apiError";
 
 // Проверяем, что в браузере есть кука csrftoken перед отправкой POST
 async function ensureCsrfToken(apiUrl: string): Promise<string> {
@@ -57,7 +37,7 @@ export async function sendAuthRequest(endpoint: string, payload: unknown): Promi
   const result = await response.json();
   
   if (!response.ok) {
-    throw new ApiError(response.status, result);
+    throw new ApiError<BaseValidationErrors<LoginFormData>>(response.status, result);
   }
 
   return userSchema.parse(result);

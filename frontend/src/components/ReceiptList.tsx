@@ -34,7 +34,6 @@ const STATUS_CONFIG: Record<string, { className: string; icon: React.ReactNode }
 };
 
 export default function ReceiptsList({ receipts, loading, user }: ReceiptsListProps) {
-  if (loading) return <div className="loading">Загрузка данных...</div>;
   if (user === null) return (
     <div className="empty-container">
       <div className="empty-list-img">
@@ -55,6 +54,7 @@ export default function ReceiptsList({ receipts, loading, user }: ReceiptsListPr
       </div>
     </div>
   );
+  if (loading) return <div className="loading">Загрузка данных...</div>;
   if (receipts.length === 0) return (
     <div className="empty-container">
       <div className="empty-list-img">

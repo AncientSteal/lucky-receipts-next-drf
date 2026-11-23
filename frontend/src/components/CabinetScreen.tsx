@@ -3,18 +3,25 @@ import ReceiptsList from "./ReceiptList";
 import Pagination from "./Pagination";
 import ListFooter from "./ListFooter";
 import "./CabinetScreen.css";
-import { useUserStore } from "@/app/store/useUserStore";
+import { useReceiptsQuery } from "@/app/hooks/useReceiptsQuery";
+import { useUserQuery } from "@/app/hooks/useUser";
 
 export default function CabinetScreen() {
-  const receipts = useReceiptsStore((state) => state.receipts);
-  const count = useReceiptsStore((state) => state.count);
   const page = useReceiptsStore((state) => state.page);
-  const receiptsLoading = useReceiptsStore((state) => state.loading);
   const setPage = useReceiptsStore((state) => state.setPage);
-  const user = useUserStore((state) => state.user);
-  const isUserInitialized = useUserStore((state) => state.isInitialized);
+  const { data: user = null, isPending: isUserLoading } = useUserQuery();
+  const {
+    data,
+    isPending: receiptsLoading,
+    isFetching,
+    error,
+  } = useReceiptsQuery(page, user?.id);
 
-  const isLoading = !isUserInitialized || receiptsLoading;
+  // Достаём массив и счётчик с сэйвовыми значениями
+  const receipts = data?.results ?? [];
+  const count = data?.count ?? 0;
+
+  const isLoading = isUserLoading || receiptsLoading;
 
   return (
     <section className="screen-cabinet">
