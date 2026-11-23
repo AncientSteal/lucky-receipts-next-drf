@@ -1,5 +1,6 @@
 .env
 .env.development
+.env.example
 __pycache__/
 *.pyc
 node_modules/
@@ -8,3 +9,4 @@ db_data/
 .idea/
 .vscode/
 CODE_REVIEW.md
+.clineignore

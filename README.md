@@ -7,7 +7,7 @@
 - **Backend:** Python 3.12, Django 5.1, Django REST Framework (DRF)
 - **Database:** PostgreSQL 16
 - **Frontend:** React 19, Next.js
-- **Infa & CI:** Docker Compose, GitHub Actions (линтеры + тесты)
+- **Infra & CI:** Docker Compose, GitHub Actions (линтеры + тесты)
 
 ## Скриншот личного кабинета
 ![Скриншот личного кабинета](./frontend/public/images/screenshot.png)
